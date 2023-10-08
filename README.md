@@ -5,7 +5,7 @@
 A Clojure library that provides two level caching to core.memoize then redis on cache miss
 
 ## Usage
-
+If no expire value passed defaults to 1 hour, passing -1 expiry disables ttl
 ``` 
 (defn slowly [n]
   (Thread/sleep 5000)

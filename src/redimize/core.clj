@@ -31,12 +31,11 @@
         (to-redis my-wcar-opts f :key key :expire expire)
         :ttl/threshold (* expire 1000)))))
 
-
-(defn slowly [n]
-  (Thread/sleep 5000)
-  n)
-
 (comment
+  (defn slowly [n]
+    (Thread/sleep 5000)
+    n)
+
   (def conn {:host "127.0.0.1", :port 6379})
 
   (def memoized-test (dual-memo nil slowly :key "test-1" :expire -1))
