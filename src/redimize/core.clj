@@ -37,12 +37,12 @@
   n)
 
 (comment
-  (def     my-wcar-opts {:host "127.0.0.1", :port 6379})
+  (def conn {:host "127.0.0.1", :port 6379})
 
   (def memoized-test (dual-memo nil slowly :key "test-1" :expire -1))
-  (def memoized-test1 (dual-memo my-wcar-opts slowly :key "test02" :expire 9))
-  (def memoized-test2 (dual-memo my-wcar-opts slowly :key "test60" :expire 60))
+  (def memoized-test1 (dual-memo conn slowly :key "test09" :expire 9))
+  (def memoized-test2 (dual-memo conn slowly :key "test60" :expire 60))
 
   (time (prn (memoized-test -1)))
-  (time (prn (memoized-test1 2)))
+  (time (prn (memoized-test1 9)))
   (time (prn (memoized-test2 60))))
