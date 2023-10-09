@@ -8,24 +8,27 @@
    :spec {:host (or host (:host (car/make-conn-spec)))
           :port (or port (:port (car/make-conn-spec)))}})
 
+(def ret (atom nil))
+
 (defn to-redis
   [my-wcar-opts f & {:keys [key expire]}]
   {:pre [(string? key)]}
   (fn [& args]
     (let [expire (if (not expire) 60 expire)
-          ret (apply f args)
+          _ (reset! ret nil)
           my-wcar-opts (check-opts my-wcar-opts)]
       (let [memo-key (str key ":" (pr-str args))]
         (try
           (if-let [val (car/wcar my-wcar-opts (car/get memo-key))]
             val
-            (do
-              (car/wcar my-wcar-opts (car/set memo-key ret))
+            (let [retv (apply f args)
+                  _ (reset! ret retv)]
+              (car/wcar my-wcar-opts (car/set memo-key retv))
               (when (not= -1 expire) (car/wcar my-wcar-opts (car/expire memo-key expire)))
-              ret))
+              retv))
           (catch Exception e
             (log/error e)
-            ret))))))
+            (if @ret @ret (apply f args))))))))
 
 (defn dual-memo
   [my-wcar-opts f & {:keys [key expire]}]

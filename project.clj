@@ -1,4 +1,4 @@
-(defproject org.clojars.bigsy/redimize "0.1.1-SNAPSHOT"
+(defproject org.clojars.bigsy/redimize "0.1.2-SNAPSHOT"
   :description "two level memoize redis caching in clojure"
   :url "https://github.com/Bigsy/redimize"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
