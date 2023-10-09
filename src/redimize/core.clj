@@ -1,5 +1,6 @@
 (ns redimize.core
-  (:require [taoensso.carmine :as car]
+  (:require [clojure.tools.logging :as log]
+            [taoensso.carmine :as car]
             [clojure.core.memoize :as cm]))
 
 (defn check-opts [{:keys [pool host port]}]
@@ -12,13 +13,18 @@
   {:pre [(string? key)]}
   (fn [& args]
     (let [expire (if (not expire) 60 expire)
+          ret (apply f args)
           my-wcar-opts (check-opts my-wcar-opts)]
       (let [memo-key (str key ":" (pr-str args))]
-        (if-let [val (car/wcar my-wcar-opts (car/get memo-key))]
-          val
-          (let [ret (apply f args)]
-            (car/wcar my-wcar-opts (car/set memo-key ret))
-            (when (not= -1 expire) (car/wcar my-wcar-opts (car/expire memo-key expire)))
+        (try
+          (if-let [val (car/wcar my-wcar-opts (car/get memo-key))]
+            val
+            (do
+              (car/wcar my-wcar-opts (car/set memo-key ret))
+              (when (not= -1 expire) (car/wcar my-wcar-opts (car/expire memo-key expire)))
+              ret))
+          (catch Exception e
+            (log/error e)
             ret))))))
 
 (defn dual-memo
