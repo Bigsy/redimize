@@ -21,9 +21,11 @@
   (Thread/sleep 500)
   n)
 
-(def memoized-test (red/dual-memo conn slowly :key "test-1" :expire -1))
-(def memoized-test2 (red/dual-memo conn-broken slowly :key "test-2" :expire -1))
-(def memoized-test3 (red/dual-memo conn slowly :key "test-3" :expire 1))
+(def memoized-test (red/dual-memo conn slowly :keyprefix "test-1" :expire -1))
+(def memoized-test2 (red/dual-memo conn-broken slowly :keyprefix "test-2" :expire -1))
+(def memoized-test3 (red/dual-memo conn slowly :keyprefix "test-3" :expire 1))
+(def memoized-test4 (red/dual-memo conn slowly :expire 1))
+
 
 
 
@@ -33,8 +35,8 @@
     (let [end (System/currentTimeMillis)]
       (is (< 500 (- end start))))
 
-    (is (= "-1" (car/wcar (red/check-opts conn) (car/get "test-1:(-1)"))))
-    (is (= -1 (car/wcar (red/check-opts conn) (car/ttl "test-1:(-1)")))))
+    (is (= "-1" (car/wcar (red/check-opts conn) (car/get "test-1:redimize.core_test$slowly:(-1)"))))
+    (is (= -1 (car/wcar (red/check-opts conn) (car/ttl "test-1:redimize.core_test$slowly:(-1)")))))
 
   (let [start (System/currentTimeMillis)]
     (is (= -1 (memoized-test -1)))
@@ -48,8 +50,8 @@
     (let [end (System/currentTimeMillis)]
       (is (< 500 (- end start)))))
 
-  (is (= nil (car/wcar (red/check-opts conn) (car/get "test-2:(-1)"))))
-  (is (= -2 (car/wcar (red/check-opts conn) (car/ttl "test-2:(-1)"))))
+  (is (= nil (car/wcar (red/check-opts conn) (car/get "test-2:redimize.core_test$slowly:(-1)"))))
+  (is (= -2 (car/wcar (red/check-opts conn) (car/ttl "test-2:redimize.core_test$slowly:(-1)"))))
 
 
   (let [start (System/currentTimeMillis)]
@@ -63,8 +65,8 @@
     (let [end (System/currentTimeMillis)]
       (is (< 500 (- end start))))
 
-    (is (= "1" (car/wcar (red/check-opts conn) (car/get "test-3:(1)"))))
-    (is (= 1 (car/wcar (red/check-opts conn) (car/ttl "test-3:(1)")))))
+    (is (= "1" (car/wcar (red/check-opts conn) (car/get "test-3:redimize.core_test$slowly:(1)"))))
+    (is (= 1 (car/wcar (red/check-opts conn) (car/ttl "test-3:redimize.core_test$slowly:(1)")))))
 
   (Thread/sleep 1000)
 
@@ -73,3 +75,16 @@
     (let [end (System/currentTimeMillis)]
       (is (< 500 (- end start))))))
 
+(deftest no-prefix
+  (let [start (System/currentTimeMillis)]
+    (is (= -1 (memoized-test4 -1)))
+    (let [end (System/currentTimeMillis)]
+      (is (< 500 (- end start))))
+
+    (is (= "-1" (car/wcar (red/check-opts conn) (car/get "redimize.core_test$slowly:(-1)"))))
+    (is (= 1 (car/wcar (red/check-opts conn) (car/ttl "redimize.core_test$slowly:(-1)")))))
+
+  (let [start (System/currentTimeMillis)]
+    (is (= -1 (memoized-test4 -1)))
+    (let [end (System/currentTimeMillis)]
+      (is (> 2 (- end start))))))

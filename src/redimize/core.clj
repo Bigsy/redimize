@@ -10,14 +10,20 @@
 
 (def ret (atom nil))
 
+
+(defn fully-qualified-name [fn]
+  (let [fn-meta (meta fn)
+        fn-ns (ns-name (:ns fn-meta))]
+    (str fn-ns "/" (:name fn-meta))))
+
 (defn to-redis
-  [my-wcar-opts f & {:keys [key expire]}]
-  {:pre [(string? key)]}
+  [my-wcar-opts f & {:keys [keyprefix expire]}]
   (fn [& args]
     (let [expire (if (not expire) 60 expire)
           _ (reset! ret nil)
           my-wcar-opts (check-opts my-wcar-opts)]
-      (let [memo-key (str key ":" (pr-str args))]
+      (let [memo-key (str (pr-str (type f)) ":" (pr-str args))
+            memo-key (if keyprefix (str keyprefix ":" memo-key) memo-key)]
         (try
           (if-let [val (car/wcar my-wcar-opts (car/get memo-key))]
             val
@@ -31,13 +37,12 @@
             (if @ret @ret (apply f args))))))))
 
 (defn dual-memo
-  [my-wcar-opts f & {:keys [key expire]}]
-  {:pre [(string? key)]}
+  [my-wcar-opts f & {:keys [keyprefix expire]}]
   (let [expire (if (not expire) 60 expire)]
     (if (= -1 expire)
-      (cm/memo (to-redis my-wcar-opts f :key key :expire expire))
+      (cm/memo (to-redis my-wcar-opts f :keyprefix keyprefix :expire expire))
       (cm/ttl
-        (to-redis my-wcar-opts f :key key :expire expire)
+        (to-redis my-wcar-opts f :keyprefix keyprefix :expire expire)
         :ttl/threshold (* expire 1000)))))
 
 (comment

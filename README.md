@@ -5,21 +5,35 @@
 A Clojure library that provides two level caching to core.memoize then redis on cache miss
 
 ## Usage
-If no expire value passed defaults to 1 hour, passing -1 expiry disables ttl
-``` 
+Expire is in seconds ff no value passed defaults to 1 hour, passing -1 expiry disables ttl
+
+By default the redis key will the fully qualified function name followed by args
+
+`"redimize.core_test$slowly:(-1)"`
+
+You can pass an optional prefix if you need to disambiguate
+
+``` clojure
+(:require [redimize.core :as red])
+
 (defn slowly [n]
   (Thread/sleep 5000)
   n)
   
 (def conn {:host "127.0.0.1", :port 6379})
 
-(def memoized-test (dual-memo nil slowly :key "test-1" :expire -1))
-(def memoized-test1 (dual-memo conn slowly :key "test09" :expire 9))
-(def memoized-test2 (dual-memo conn slowly :key "test60" :expire 60))
+(def memoized-no-key (red/dual-memo conn slowly :expire -1))
+(def memoized-test   (red/dual-memo conn slowly :keyprefix "test-1" :expire -1))
+(def memoized-test1  (red/dual-memo conn slowly :keypreifx "test09" :expire 9))
+(def memoized-test2  (red/dual-memo conn slowly :keyprefix "test60" :expire 60))
+(def memoized-1-hour (red/dual-memo conn slowly))
 
+
+(time (prn (memoized-no-prefix -1)))
 (time (prn (memoized-test -1)))
 (time (prn (memoized-test1 9)))
 (time (prn (memoized-test2 60)))
+(time (prn (memoized-1-hour 60)))
 ```
 
 ## License
