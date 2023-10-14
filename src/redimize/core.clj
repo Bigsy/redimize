@@ -10,12 +10,6 @@
 
 (def ret (atom nil))
 
-
-(defn fully-qualified-name [fn]
-  (let [fn-meta (meta fn)
-        fn-ns (ns-name (:ns fn-meta))]
-    (str fn-ns "/" (:name fn-meta))))
-
 (defn to-redis
   [my-wcar-opts f & {:keys [keyprefix expire]}]
   (fn [& args]
@@ -44,18 +38,3 @@
       (cm/ttl
         (to-redis my-wcar-opts f :keyprefix keyprefix :expire expire)
         :ttl/threshold (* expire 1000)))))
-
-(comment
-  (defn slowly [n]
-    (Thread/sleep 5000)
-    n)
-
-  (def conn {:host "127.0.0.1", :port 6379})
-
-  (def memoized-test (dual-memo nil slowly :key "test-1" :expire -1))
-  (def memoized-test1 (dual-memo conn slowly :key "test09" :expire 9))
-  (def memoized-test2 (dual-memo conn slowly :key "test60" :expire 60))
-
-  (time (prn (memoized-test -1)))
-  (time (prn (memoized-test1 9)))
-  (time (prn (memoized-test2 60))))
