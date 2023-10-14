@@ -3,10 +3,10 @@
             [taoensso.carmine :as car]
             [clojure.core.memoize :as cm]))
 
-(defn check-opts [{:keys [pool host port]}]
+(defn check-opts [{:keys [pool host port spec]}]
   {:pool (or pool (car/connection-pool {}))
-   :spec {:host (or host (:host (car/make-conn-spec)))
-          :port (or port (:port (car/make-conn-spec)))}})
+   :spec (or spec {:host (or host (:host (car/make-conn-spec)))
+                   :port (or port (:port (car/make-conn-spec)))})})
 
 (def ret (atom nil))
 
