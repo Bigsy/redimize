@@ -5,7 +5,7 @@
 A Clojure library that provides two level caching to core.memoize then redis on cache miss
 
 ## Usage
-Expire is in seconds ff no value passed defaults to 1 hour, passing -1 expiry disables ttl
+Expire is in seconds if no value passed it defaults to 1 hour, passing -1 expiry disables ttl passing 0 means the redis side is not used as redis does not support ttl 0
 
 By default the redis key will the fully qualified function name followed by args
 

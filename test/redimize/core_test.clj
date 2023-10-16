@@ -25,6 +25,8 @@
 (def memoized-test2 (red/dual-memo conn-broken slowly :keyprefix "test-2" :expire -1))
 (def memoized-test3 (red/dual-memo conn slowly :keyprefix "test-3" :expire 1))
 (def memoized-test4 (red/dual-memo conn slowly :expire 1))
+(def memoized-test5 (red/dual-memo conn slowly :expire 0))
+
 
 
 
@@ -88,3 +90,17 @@
     (is (= -1 (memoized-test4 -1)))
     (let [end (System/currentTimeMillis)]
       (is (> 2 (- end start))))))
+
+(deftest zero-expire
+  (let [start (System/currentTimeMillis)]
+    (is (= -1 (memoized-test5 -1)))
+    (let [end (System/currentTimeMillis)]
+      (is (< 500 (- end start))))
+
+    (is (= nil (car/wcar (red/check-opts conn) (car/get "redimize.core_test$slowly:(-1)"))))
+    (is (= -2 (car/wcar (red/check-opts conn) (car/ttl "redimize.core_test$slowly:(-1)")))))
+
+  (let [start (System/currentTimeMillis)]
+    (is (= -1 (memoized-test5 -1)))
+    (let [end (System/currentTimeMillis)]
+      (is (<= 500 (- end start))))))

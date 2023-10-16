@@ -33,8 +33,10 @@
 (defn dual-memo
   [my-wcar-opts f & {:keys [keyprefix expire]}]
   (let [expire (if (not expire) 60 expire)]
-    (if (= -1 expire)
-      (cm/memo (to-redis my-wcar-opts f :keyprefix keyprefix :expire expire))
-      (cm/ttl
-        (to-redis my-wcar-opts f :keyprefix keyprefix :expire expire)
-        :ttl/threshold (* expire 1000)))))
+    (if (= 0 expire)
+      f
+      (if (= -1 expire)
+        (cm/memo (to-redis my-wcar-opts f :keyprefix keyprefix :expire expire))
+        (cm/ttl
+          (to-redis my-wcar-opts f :keyprefix keyprefix :expire expire)
+          :ttl/threshold (* expire 1000))))))

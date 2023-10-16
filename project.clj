@@ -1,4 +1,4 @@
-(defproject org.clojars.bigsy/redimize "0.1.6"
+(defproject org.clojars.bigsy/redimize "0.1.7"
   :description "two level memoize redis caching in clojure"
   :url "https://github.com/Bigsy/redimize"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -8,6 +8,6 @@
                  [org.clojure/core.memoize "1.0.257"]
                  [tupelo "23.07.04"]]
 
-  :profiles {:dev {:dependencies [[org.clojars.bigsy/redis-embedded-clj "0.0.1-SNAPSHOT"]]}}
+  :profiles {:dev {:dependencies [[org.clojars.bigsy/redis-embedded-clj "0.0.2"]]}}
 
   :repl-options {:init-ns redimize.core})
